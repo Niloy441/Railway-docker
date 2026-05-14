@@ -15,11 +15,11 @@ RUN apt-get update && \
         wget \
         git \
         sudo \
+        xz-utils \
         dbus-x11 \
         xauth \
         x11-xserver-utils \
         xfce4 \
-        xfce4-goodies \
         xfce4-terminal \
         tigervnc-standalone-server \
         tigervnc-common \
@@ -72,16 +72,16 @@ RUN useradd -m -s /bin/bash ${USER} && \
 RUN mkdir -p /tmp/fluent-build /usr/share/themes /usr/share/icons && \
     cd /tmp/fluent-build && \
     (GIT_TERMINAL_PROMPT=0 git clone --depth=1 https://github.com/vinceliuice/Fluent-gtk-theme.git Fluent-gtk-theme && \
-    cd Fluent-gtk-theme && \
-    (bash install.sh --dest /usr/share/themes --tweaks round solid || bash install.sh --dest /usr/share/themes || true)) || true && \
+        cd Fluent-gtk-theme && \
+        (bash install.sh --dest /usr/share/themes --tweaks round solid || bash install.sh --dest /usr/share/themes || true)) || true && \
     cd /tmp/fluent-build && \
     (GIT_TERMINAL_PROMPT=0 git clone --depth=1 https://github.com/vinceliuice/Fluent-icon-theme.git Fluent-icon-theme && \
-    cd Fluent-icon-theme && \
-    (bash install.sh --dest /usr/share/icons || bash install.sh || true)) || true && \
+        cd Fluent-icon-theme && \
+        (bash install.sh --dest /usr/share/icons || bash install.sh || true)) || true && \
     cd /tmp/fluent-build && \
     (GIT_TERMINAL_PROMPT=0 git clone --depth=1 https://github.com/vinceliuice/Fluent-cursors.git Fluent-cursors && \
-    cd Fluent-cursors && \
-    (bash install.sh || cp -r dist/* /usr/share/icons/ || true)) || true && \
+        cd Fluent-cursors && \
+        (bash install.sh || cp -r dist/* /usr/share/icons/ || true)) || true && \
     rm -rf /tmp/fluent-build
 
 RUN mkdir -p \
@@ -104,12 +104,14 @@ RUN mkdir -p \
         '<?xml version="1.0" encoding="UTF-8"?>' \
         '<channel name="xsettings" version="1.0">' \
         '  <property name="Net" type="empty">' \
-        '    <property name="ThemeName" type="string" value="Fluent"/>' \
+        '    <property name="ThemeName" type="string" value="Fluent-round"/>' \
         '    <property name="IconThemeName" type="string" value="Fluent"/>' \
-        '    <property name="CursorThemeName" type="string" value="Fluent-cursors"/>' \
         '  </property>' \
         '  <property name="Gtk" type="empty">' \
         '    <property name="CursorThemeName" type="string" value="Fluent-cursors"/>' \
+        '    <property name="CursorThemeSize" type="int" value="24"/>' \
+        '    <property name="FontName" type="string" value="Noto Sans 10"/>' \
+        '    <property name="MonospaceFontName" type="string" value="Noto Sans Mono 10"/>' \
         '  </property>' \
         '</channel>' \
         > /home/${USER}/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml && \
@@ -129,19 +131,19 @@ RUN mkdir -p \
     chown -R ${USER}:${USER} /home/${USER}
 
 RUN printf '%s\n' \
-        '#!/bin/bash' \
-        'set -e' \
-        'export USER=admin' \
-        'export HOME=/home/admin' \
-        'export DISPLAY=:1' \
-        'rm -f /home/admin/.vnc/*.pid /home/admin/.vnc/*.log /tmp/.X1-lock /tmp/.X11-unix/X1' \
-        'mkdir -p /tmp/.X11-unix' \
-        'chmod 1777 /tmp/.X11-unix' \
-        'chown -R admin:admin /home/admin' \
-        'su - admin -c "vncserver -kill :1 >/dev/null 2>&1 || true"' \
-        'su - admin -c "vncserver :1 -geometry 1280x720 -depth 24 -localhost no"' \
-        'exec websockify --web=/usr/share/novnc/ 0.0.0.0:${PORT:-8080} localhost:5901' \
-        > /start.sh && \
+    '#!/bin/bash' \
+    'set -e' \
+    'export USER=admin' \
+    'export HOME=/home/admin' \
+    'export DISPLAY=:1' \
+    'rm -f /home/admin/.vnc/*.pid /home/admin/.vnc/*.log /tmp/.X1-lock /tmp/.X11-unix/X1' \
+    'mkdir -p /tmp/.X11-unix' \
+    'chmod 1777 /tmp/.X11-unix' \
+    'chown -R admin:admin /home/admin' \
+    'su - admin -c "vncserver -kill :1 >/dev/null 2>&1 || true"' \
+    'su - admin -c "vncserver :1 -geometry 1280x720 -depth 24 -localhost no"' \
+    'exec websockify --web=/usr/share/novnc/ 0.0.0.0:${PORT:-8080} localhost:5901' \
+    > /start.sh && \
     chmod +x /start.sh
 
 CMD ["/start.sh"]

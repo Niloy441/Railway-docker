@@ -98,13 +98,7 @@ RUN mkdir -p \
         'exec startxfce4' \
         > /home/${USER}/.vnc/xstartup && \
     chmod +x /home/${USER}/.vnc/xstartup && \
-    if command -v vncpasswd >/dev/null 2>&1; then \
-        echo "${PASS}" | vncpasswd -f > /home/${USER}/.vnc/passwd; \
-    elif command -v tigervncpasswd >/dev/null 2>&1; then \
-        echo "${PASS}" | tigervncpasswd -f > /home/${USER}/.vnc/passwd; \
-    else \
-        echo "No VNC password command found" && exit 1; \
-    fi && \
+    echo "${PASS}" | tigervncpasswd -f > /home/${USER}/.vnc/passwd && \
     chmod 600 /home/${USER}/.vnc/passwd && \
     printf '%s\n' \
         '<?xml version="1.0" encoding="UTF-8"?>' \
